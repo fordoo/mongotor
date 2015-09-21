@@ -224,18 +224,18 @@ class Sha1Field(Field):
         except:
             raise(TypeError("The Sha1 hash should be a 20byte hash value"))
 
-        return  value
+        return value
 
 
 class EmbeddedField(Field):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, embedded_document=None, *args, **kwargs):
         super(EmbeddedField, self).__init__(*args, **kwargs)
+        self.embedded_class = embedded_document
 
     def _validate(self, value):
         from mongotor.orm.collection import Collection
 
-        # use 'issubclass' instead?
-        if value is not None and not isinstance(value, Collection):
+        if value is not None and not issubclass(self.embedded_class, Collection):
             raise(TypeError("The Embedded Field must be a subclass of Collection"))
         return value
 
