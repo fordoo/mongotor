@@ -233,14 +233,14 @@ class EmbeddedField(Field):
         self.embedded_class = embedded_document
 
     def _validate(self, value):
-        from mongotor.orm.collection import Collection
-
-        if value is not None and not issubclass(self.embedded_class, Collection):
-            raise(TypeError("The Embedded Field must be a subclass of Collection"))
+        if value is not None:
+            if isinstance(value, dict):
+                embedded_obj = self.embedded_class()
+                for k, v in value.iteritems():
+                    setattr(embedded_obj, k, v)
+                return embedded_obj
+            elif isinstance(value, self.embedded_class):
+                return value.as_dict()
+            else:
+                raise (TypeError("The EmbeddedField value should be a instance of sub Collection class"))
         return value
-
-    def __get__(self, instance, owner):
-        embedded_document = instance._data.get(self.name)
-        if embedded_document is None:
-            return self.default() if callable(self.default) else self.default
-        return embedded_document.as_dict()
